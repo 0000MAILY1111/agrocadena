@@ -1,0 +1,385 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "id",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "nombre",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "ubicacion",
+						"type": "string"
+					}
+				],
+				"name": "AgricultorRegistrado",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "ProductoEnviado",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "comprador",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "precio",
+						"type": "uint256"
+					}
+				],
+				"name": "ProductoFinanciado",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "ProductoRecibido",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "agricultor",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "nombreProducto",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "precio",
+						"type": "uint256"
+					}
+				],
+				"name": "ProductoRegistrado",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "descripcion",
+						"type": "string"
+					}
+				],
+				"name": "ProductoTransferido",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "agricultores",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "id",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "nombre",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "ubicacion",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					}
+				],
+				"name": "confirmarEntrega",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "contadorProductos",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					}
+				],
+				"name": "financiarCompra",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					}
+				],
+				"name": "marcarEnviado",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					}
+				],
+				"name": "obtenerHistorial",
+				"outputs": [
+					{
+						"internalType": "string[]",
+						"name": "",
+						"type": "string[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "productos",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "nombreProducto",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "precio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address payable",
+						"name": "agricultor",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "comprador",
+						"type": "address"
+					},
+					{
+						"internalType": "enum AgroChain.Estado",
+						"name": "estado",
+						"type": "uint8"
+					},
+					{
+						"internalType": "string",
+						"name": "urlImagen",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_nombreProducto",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_precio",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "_urlImagen",
+						"type": "string"
+					}
+				],
+				"name": "publicarProducto",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_nombre",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_ubicacion",
+						"type": "string"
+					}
+				],
+				"name": "registrarAgricultor",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "_nuevoPropietario",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "_descripcion",
+						"type": "string"
+					}
+				],
+				"name": "transferirProducto",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/agroCadenaArbit.sol": "AgroChain"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/agroCadenaArbit.sol": {
+			"keccak256": "0xf050981c8d87a88e1309b9cfb70e5b7094e0fedfef96418bcc0df1a019fe0293",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://479cd48cc2cbe34a880044d91bf401eafed63b5b5e2493ea4711c52da629a5c9",
+				"dweb:/ipfs/QmecyTe4bVW6c5jytyPM47ady559X6tswXDYJebPWvaXnS"
+			]
+		}
+	},
+	"version": 1
+}

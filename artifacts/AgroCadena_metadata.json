@@ -1,0 +1,311 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "id",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "nombre",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "ubicacion",
+						"type": "string"
+					}
+				],
+				"name": "AgricultorRegistrado",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "agricultor",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "nombreProducto",
+						"type": "string"
+					}
+				],
+				"name": "ProductoRegistrado",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "de",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "hacia",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "descripcion",
+						"type": "string"
+					}
+				],
+				"name": "ProductoTransferido",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "agricultores",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "id",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "nombre",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "ubicacion",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "contadorProductos",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					}
+				],
+				"name": "obtenerProducto",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "propietarioActual",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "agricultorOriginal",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "nombreProducto",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "urlImagen",
+						"type": "string"
+					},
+					{
+						"internalType": "string[]",
+						"name": "historialTransacciones",
+						"type": "string[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "productos",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "propietarioActual",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "agricultorOriginal",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "nombreProducto",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "urlImagen",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_nombre",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_ubicacion",
+						"type": "string"
+					}
+				],
+				"name": "registrarAgricultor",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "_nombreProducto",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "_urlImagen",
+						"type": "string"
+					}
+				],
+				"name": "registrarProducto",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_idProducto",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "_nuevoPropietario",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "_descripcion",
+						"type": "string"
+					}
+				],
+				"name": "transferirProducto",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/agroCadena.sol": "AgroCadena"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/agroCadena.sol": {
+			"keccak256": "0xc15c974eb0fec9c9c06bf8350119f93d3d8e45dacbae35d5a5a1a071c88ddb47",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://a6a71a0e5744e1e5e800d335a5c88935bf0a3694824229646fd377c191e5ba37",
+				"dweb:/ipfs/QmSyNxyTg6RjCX77LaT2c2Dyufy4dGpBXQCmhGsFazXkj5"
+			]
+		}
+	},
+	"version": 1
+}
