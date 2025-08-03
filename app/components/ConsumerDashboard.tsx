@@ -2,32 +2,53 @@
 
 import React, { useState, useEffect } from 'react';
 import { Leaf, Search, ShoppingCart, Heart, MapPin, Calendar, DollarSign, Star, Shield, Users, 
-  ArrowLeft, Filter, Eye, CheckCircle, Wallet, AlertCircle, Loader
+  ArrowLeft, Filter, Eye, CheckCircle, Wallet, AlertCircle, Loader, Network, Zap, ArrowRightLeft
 } from 'lucide-react';
 
 const ConsumerDashboard = () => {
   const [account, setAccount] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [networkError, setNetworkError] = useState(false);
+  const [currentNetwork, setCurrentNetwork] = useState(null);
   const [cart, setCart] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedNetwork, setSelectedNetwork] = useState('fuji');
+  const [icmEnabled, setIcmEnabled] = useState(false);
+  const [crossChainTxs, setCrossChainTxs] = useState([]);
 
-  // Sepolia network configuration
-  const SEPOLIA_CHAIN_ID = '0xaa36a7';
-  const SEPOLIA_NETWORK = {
-    chainId: SEPOLIA_CHAIN_ID,
-    chainName: 'Sepolia Test Network',
-    nativeCurrency: {
-      name: 'Sepolia ETH',
-      symbol: 'SEP',
-      decimals: 18
+  // Network configurations
+  const NETWORKS = {
+    fuji: {
+      chainId: '0xa869',
+      chainName: 'Avalanche Fuji Testnet',
+      nativeCurrency: {
+        name: 'Avalanche',
+        symbol: 'AVAX',
+        decimals: 18
+      },
+      rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
+      blockExplorerUrls: ['https://testnet.snowtrace.io/'],
+      marketplaceAddress: '0x1234567890123456789012345678901234567890',
+      icmMessenger: '0x253b2784c75e510dD0fF1da844684a1aC0aa5fcf'
     },
-    rpcUrls: ['https://sepolia.infura.io/v3/'],
-    blockExplorerUrls: ['https://sepolia.etherscan.io/']
+    sepolia: {
+      chainId: '0xaa36a7',
+      chainName: 'Sepolia Test Network',
+      nativeCurrency: {
+        name: 'Sepolia ETH',
+        symbol: 'SEP',
+        decimals: 18
+      },
+      rpcUrls: ['https://sepolia.infura.io/v3/'],
+      blockExplorerUrls: ['https://sepolia.etherscan.io/'],
+      marketplaceAddress: '0x742d35Cc7861C4532fF56c7b2b4e2A7267b2cf2B',
+      icmMessenger: '0x987654321098765432109876543210987654321'
+    }
   };
 
   useEffect(() => {
     checkWalletConnection();
+    loadCrossChainHistory();
   }, []);
 
   const checkWalletConnection = async () => {
@@ -47,10 +68,14 @@ const ConsumerDashboard = () => {
   const checkNetwork = async () => {
     try {
       const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-      if (chainId !== SEPOLIA_CHAIN_ID) {
-        setNetworkError(true);
-      } else {
+      const network = Object.entries(NETWORKS).find(([_, config]) => config.chainId === chainId);
+      
+      if (network) {
+        setCurrentNetwork(network[0]);
         setNetworkError(false);
+      } else {
+        setNetworkError(true);
+        setCurrentNetwork(null);
       }
     } catch (error) {
       console.error('Error checking network:', error);
@@ -67,7 +92,7 @@ const ConsumerDashboard = () => {
     try {
       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       setAccount(accounts[0]);
-      await switchToSepolia();
+      await switchNetwork(selectedNetwork);
     } catch (error) {
       console.error('Error connecting wallet:', error);
       alert('Error al conectar la billetera');
@@ -75,23 +100,28 @@ const ConsumerDashboard = () => {
     setIsConnecting(false);
   };
 
-  const switchToSepolia = async () => {
+  const switchNetwork = async (networkKey) => {
+    const network = NETWORKS[networkKey];
+    if (!network) return;
+
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: SEPOLIA_CHAIN_ID }],
+        params: [{ chainId: network.chainId }],
       });
+      setCurrentNetwork(networkKey);
       setNetworkError(false);
     } catch (switchError) {
       if (switchError.code === 4902) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [SEPOLIA_NETWORK],
+            params: [network],
           });
+          setCurrentNetwork(networkKey);
           setNetworkError(false);
         } catch (addError) {
-          console.error('Error adding Sepolia network:', addError);
+          console.error('Error adding network:', addError);
         }
       }
     }
@@ -128,8 +158,8 @@ const ConsumerDashboard = () => {
       return;
     }
 
-    if (networkError) {
-      alert('Por favor cambia a la red Sepolia');
+    if (networkError || !currentNetwork) {
+      alert('Por favor conecta a una red soportada');
       return;
     }
 
@@ -140,19 +170,23 @@ const ConsumerDashboard = () => {
 
     setIsProcessing(true);
     try {
-      // Convert total to ETH (simplified conversion for demo)
+      const network = NETWORKS[currentNetwork];
       const totalInBolivianos = getCartTotal();
-      const ethAmount = (totalInBolivianos * 0.0001).toFixed(6); // Demo conversion rate
-      const weiAmount = (parseFloat(ethAmount) * Math.pow(10, 18)).toString(16);
+      
+      // Convert to native token (simplified conversion)
+      const tokenAmount = currentNetwork === 'fuji' 
+        ? (totalInBolivianos * 0.0008).toFixed(6) // AVAX conversion
+        : (totalInBolivianos * 0.0001).toFixed(6); // ETH conversion
+      
+      const weiAmount = Math.floor(parseFloat(tokenAmount) * Math.pow(10, 18));
+      const hexValue = '0x' + weiAmount.toString(16);
 
-      // Marketplace contract address (demo address for Sepolia)
-      const marketplaceAddress = '0x742d35Cc7861C4532fF56c7b2b4e2A7267b2cf2B';
-
+      // Simple transaction without complex data encoding
       const transactionParameters = {
-        to: marketplaceAddress,
+        to: network.marketplaceAddress,
         from: account,
-        value: '0x' + weiAmount,
-        data: '0x' // Simple payment, no contract interaction for this demo
+        value: hexValue,
+        // Remove problematic data field for now - simple transfer
       };
 
       const txHash = await window.ethereum.request({
@@ -160,8 +194,16 @@ const ConsumerDashboard = () => {
         params: [transactionParameters],
       });
 
-      alert(`¡Compra exitosa! Hash de transacción: ${txHash}\nPuedes verificar tu transacción en: https://sepolia.etherscan.io/tx/${txHash}`);
+      // If ICM is enabled, trigger cross-chain notification
+      if (icmEnabled && currentNetwork !== 'fuji') {
+        await sendCrossChainMessage(txHash, cart);
+      }
+
+      const explorerUrl = network.blockExplorerUrls[0] + 'tx/' + txHash;
+      alert(`¡Compra exitosa en ${network.chainName}!\nHash: ${txHash}\nVer en: ${explorerUrl}`);
+      
       setCart([]);
+      updateCrossChainHistory(txHash, currentNetwork);
     } catch (error) {
       console.error('Error processing payment:', error);
       alert('Error al procesar el pago: ' + error.message);
@@ -169,9 +211,85 @@ const ConsumerDashboard = () => {
     setIsProcessing(false);
   };
 
+  const sendCrossChainMessage = async (txHash, cartItems) => {
+    try {
+      const network = NETWORKS[currentNetwork];
+      
+      // Create a simple message payload
+      const messageData = {
+        purchaseHash: txHash.slice(0, 10), // Shortened hash
+        buyer: account.slice(0, 10), // Shortened address
+        itemCount: cartItems.length,
+        timestamp: Math.floor(Date.now() / 1000) // Unix timestamp
+      };
+
+      // For demo purposes, we'll send a simple transaction
+      // In real implementation, this would interact with ICM contracts
+      const messageValue = '0x' + (1000000000000000).toString(16); // 0.001 ETH/AVAX for messaging
+
+      const icmTransaction = {
+        to: network.icmMessenger,
+        from: account,
+        value: messageValue,
+        // Simple transaction without complex data encoding
+      };
+
+      const icmTxHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [icmTransaction],
+      });
+
+      console.log('Cross-chain message sent:', icmTxHash);
+      
+      // Simulate cross-chain confirmation
+      setTimeout(() => {
+        setCrossChainTxs(prev => [...prev, {
+          originalTx: txHash,
+          icmTx: icmTxHash,
+          fromChain: currentNetwork,
+          toChain: 'fuji',
+          status: 'confirmed',
+          timestamp: Date.now()
+        }]);
+      }, 5000);
+
+    } catch (error) {
+      console.error('Error sending cross-chain message:', error);
+      // Don't fail the main transaction if ICM fails
+    }
+  };
+
+  // Removed problematic encoding functions that caused buffer overrun
+  // These would be replaced with proper ABI encoding in production
+
+  const loadCrossChainHistory = () => {
+    // Load from localStorage or API
+    const stored = localStorage.getItem('crossChainTxs');
+    if (stored) {
+      setCrossChainTxs(JSON.parse(stored));
+    }
+  };
+
+  const updateCrossChainHistory = (txHash, network) => {
+    const newTx = {
+      originalTx: txHash,
+      fromChain: network,
+      timestamp: Date.now(),
+      status: 'pending'
+    };
+    
+    const updated = [...crossChainTxs, newTx];
+    setCrossChainTxs(updated);
+    localStorage.setItem('crossChainTxs', JSON.stringify(updated));
+  };
+
   const formatAddress = (address) => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const getNetworkIcon = (networkKey) => {
+    return networkKey === 'fuji' ? '🔺' : '🔷';
   };
 
   const products = [
@@ -252,17 +370,51 @@ const ConsumerDashboard = () => {
                   <Leaf className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Marketplace Web3
+                  Marketplace Avalanche
                 </h1>
               </div>
             </div>
+            
             <div className="flex items-center space-x-4">
+              {/* Network Selector */}
+              <div className="flex items-center space-x-2">
+                <select 
+                  value={selectedNetwork}
+                  onChange={(e) => setSelectedNetwork(e.target.value)}
+                  className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600"
+                >
+                  <option value="fuji">🔺 Avalanche Fuji</option>
+                  <option value="sepolia">🔷 Sepolia</option>
+                </select>
+                
+                {currentNetwork && (
+                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-100 text-green-800 rounded-lg text-sm">
+                    <span>{getNetworkIcon(currentNetwork)}</span>
+                    <span>{NETWORKS[currentNetwork].chainName.split(' ')[0]}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* ICM Toggle */}
+              <div className="flex items-center space-x-2">
+                <label className="flex items-center space-x-2 text-sm">
+                  <input 
+                    type="checkbox" 
+                    checked={icmEnabled}
+                    onChange={(e) => setIcmEnabled(e.target.checked)}
+                    className="rounded"
+                  />
+                  <ArrowRightLeft className="w-4 h-4" />
+                  <span>ICM</span>
+                </label>
+              </div>
+
               {/* Wallet Connection */}
               {!account ? (
                 <button 
                   onClick={connectWallet}
                   disabled={isConnecting}
-                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50"
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all disabled:opacity-50"
                 >
                   {isConnecting ? (
                     <Loader className="w-4 h-4 animate-spin" />
@@ -281,11 +433,11 @@ const ConsumerDashboard = () => {
               {/* Network Warning */}
               {networkError && (
                 <button 
-                  onClick={switchToSepolia}
+                  onClick={() => switchNetwork(selectedNetwork)}
                   className="flex items-center space-x-2 px-3 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
                 >
                   <AlertCircle className="w-4 h-4" />
-                  <span className="text-sm">Cambiar a Sepolia</span>
+                  <span className="text-sm">Cambiar Red</span>
                 </button>
               )}
 
@@ -326,12 +478,27 @@ const ConsumerDashboard = () => {
                     <div className="mt-3 pt-3 border-t border-gray-200">
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-bold">Total: Bs. {getCartTotal().toFixed(2)}</span>
-                        <span className="text-sm text-gray-600">≈ {(getCartTotal() * 0.0001).toFixed(6)} ETH</span>
+                        <span className="text-sm text-gray-600">
+                          ≈ {currentNetwork === 'fuji' 
+                            ? (getCartTotal() * 0.0008).toFixed(6) + ' AVAX'
+                            : (getCartTotal() * 0.0001).toFixed(6) + ' ETH'
+                          }
+                        </span>
                       </div>
+                      
+                      {icmEnabled && (
+                        <div className="mb-3 p-2 bg-blue-50 rounded-lg">
+                          <div className="flex items-center text-xs text-blue-600">
+                            <ArrowRightLeft className="w-3 h-3 mr-1" />
+                            <span>ICM habilitado - Notificación cross-chain</span>
+                          </div>
+                        </div>
+                      )}
+                      
                       <button 
                         onClick={processPayment}
                         disabled={!account || networkError || isProcessing}
-                        className="w-full py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        className="w-full py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg hover:from-red-600 hover:to-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                       >
                         {isProcessing ? (
                           <>
@@ -341,7 +508,7 @@ const ConsumerDashboard = () => {
                         ) : (
                           <>
                             <Wallet className="w-4 h-4" />
-                            <span>Pagar con MetaMask</span>
+                            <span>Pagar en {currentNetwork === 'fuji' ? 'Avalanche' : 'Sepolia'}</span>
                           </>
                         )}
                       </button>
@@ -361,11 +528,19 @@ const ConsumerDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">¡Hola, María!</h2>
-          <p className="text-gray-600">Descubre productos frescos directamente de los productores bolivianos</p>
+          <p className="text-gray-600">Marketplace multi-chain con Avalanche e ICM</p>
           {account && (
-            <div className="mt-2 flex items-center space-x-2 text-sm text-green-600">
-              <CheckCircle className="w-4 h-4" />
-              <span>Billetera conectada - Listo para comprar con crypto</span>
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center space-x-2 text-sm text-green-600">
+                <CheckCircle className="w-4 h-4" />
+                <span>Billetera conectada - Red: {currentNetwork ? NETWORKS[currentNetwork].chainName : 'No detectada'}</span>
+              </div>
+              {icmEnabled && (
+                <div className="flex items-center space-x-2 text-sm text-blue-600">
+                  <ArrowRightLeft className="w-4 h-4" />
+                  <span>ICM activado - Comunicación cross-chain habilitada</span>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -419,26 +594,62 @@ const ConsumerDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white">
+            <div className="bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl p-6 text-white">
               <div className="flex items-center mb-4">
-                <Wallet className="w-6 h-6 mr-2" />
-                <h3 className="text-lg font-bold">Web3 Stats</h3>
+                <Network className="w-6 h-6 mr-2" />
+                <h3 className="text-lg font-bold">Multi-Chain Stats</h3>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span>Transacciones:</span>
-                  <span className="font-bold">7</span>
+                  <span>Red actual:</span>
+                  <span className="font-bold flex items-center">
+                    {currentNetwork ? getNetworkIcon(currentNetwork) : '❓'} 
+                    {currentNetwork ? NETWORKS[currentNetwork].chainName.split(' ')[0] : 'N/A'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>ETH gastado:</span>
-                  <span className="font-bold">0.045 ETH</span>
+                  <span>Transacciones:</span>
+                  <span className="font-bold">12</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Cross-chain:</span>
+                  <span className="font-bold">{crossChainTxs.length}</span>
                 </div>
                 <div className="flex items-center">
-                  <Shield className="w-5 h-5 mr-2 text-green-300" />
-                  <span className="text-sm">Compras verificadas on-chain</span>
+                  <ArrowRightLeft className="w-5 h-5 mr-2 text-orange-300" />
+                  <span className="text-sm">ICM {icmEnabled ? 'Activado' : 'Desactivado'}</span>
                 </div>
               </div>
             </div>
+
+            {/* Cross-chain Transaction History */}
+            {crossChainTxs.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <ArrowRightLeft className="w-5 h-5 mr-2" />
+                  Historial ICM
+                </h3>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {crossChainTxs.slice(-3).map((tx, index) => (
+                    <div key={index} className="p-2 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium">
+                          {getNetworkIcon(tx.fromChain)} → {getNetworkIcon(tx.toChain || 'fuji')}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full ${
+                          tx.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {tx.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {new Date(tx.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="lg:col-span-3">
@@ -474,8 +685,11 @@ const ConsumerDashboard = () => {
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <span className="text-lg font-bold text-gray-900">{product.price}</span>
-                          <div className="text-xs text-purple-600 font-medium">
-                            ≈ {(parseFloat(product.price.replace('Bs. ', '').replace('/kg', '')) * 0.0001).toFixed(6)} ETH
+                          <div className="text-xs text-red-600 font-medium">
+                            ≈ {currentNetwork === 'fuji' 
+                              ? (parseFloat(product.price.replace('Bs. ', '').replace('/kg', '')) * 0.0008).toFixed(6) + ' AVAX'
+                              : (parseFloat(product.price.replace('Bs. ', '').replace('/kg', '')) * 0.0001).toFixed(6) + ' ETH'
+                            }
                           </div>
                         </div>
                         <div className="flex items-center">
@@ -489,7 +703,7 @@ const ConsumerDashboard = () => {
                           onClick={() => addToCart(product)}
                           className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                             product.inStock 
-                              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700' 
+                              ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white hover:from-red-600 hover:to-orange-600' 
                               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           }`} 
                           disabled={!product.inStock}
