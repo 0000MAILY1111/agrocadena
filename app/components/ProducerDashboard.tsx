@@ -12,7 +12,6 @@ import {
 
 const ProducerDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-<<<<<<< HEAD
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [uploadErrors, setUploadErrors] = useState([]);
@@ -124,8 +123,6 @@ const ProducerDashboard = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
-=======
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
 
   const QualitySection = () => (
     <div className="space-y-6">
@@ -149,7 +146,6 @@ const ProducerDashboard = () => {
                 <div className={`w-10 h-10 bg-${cert.color}-100 rounded-lg flex items-center justify-center text-${cert.color}-600`}>
                   {cert.icon}
                 </div>
-<<<<<<< HEAD
 
                 {uploadErrors.length > 0 && (
                   <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -164,8 +160,6 @@ const ProducerDashboard = () => {
                     </ul>
                   </div>
                 )}
-=======
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                 <div>
                   <h4 className="font-semibold text-gray-900">{cert.name}</h4>
                   <div className="flex items-center">
@@ -231,7 +225,6 @@ const ProducerDashboard = () => {
     </div>
   );
 
-<<<<<<< HEAD
   const AddProductModal = () => (
     <>
       {showAddProductModal && (
@@ -450,12 +443,10 @@ const ProducerDashboard = () => {
               </div>
             </div>
 
-            {/* Botones de Acción */}
             <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
               <div className="flex space-x-4">
                 <button
                   onClick={() => {
-                    // Limpiar URLs de preview
                     newProduct.images.forEach(image => {
                       if (image.preview) {
                         URL.revokeObjectURL(image.preview);
@@ -469,11 +460,9 @@ const ProducerDashboard = () => {
                 </button>
                 <button
                   onClick={() => {
-                    // Aquí iría la lógica para guardar el producto
                     console.log('Nuevo producto:', newProduct);
                     console.log('Imágenes a subir:', newProduct.images.map(img => img.file));
                     
-                    // Limpiar URLs de preview
                     newProduct.images.forEach(image => {
                       if (image.preview) {
                         URL.revokeObjectURL(image.preview);
@@ -508,8 +497,6 @@ const ProducerDashboard = () => {
     </>
   );
 
-=======
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
   const SalesSection = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -775,29 +762,17 @@ const ProducerDashboard = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
                   <Leaf className="w-6 h-6 text-white" />
                 </div>
-<<<<<<< HEAD
                 <h1 className="text-2xl font-bold text-black">
-=======
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                   Panel Productor Avanzado
                 </h1>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-<<<<<<< HEAD
               <button className="relative p-2 text-black hover:text-green-600 transition-colors">
                 <Bell className="w-6 h-6" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
               <button className="p-2 text-black hover:text-green-600 transition-colors">
-=======
-              <button className="relative p-2 text-gray-600 hover:text-green-600 transition-colors">
-                <Bell className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </button>
-              <button className="p-2 text-gray-600 hover:text-green-600 transition-colors">
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                 <Settings className="w-6 h-6" />
               </button>
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
@@ -822,11 +797,7 @@ const ProducerDashboard = () => {
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'bg-green-600 text-white'
-<<<<<<< HEAD
                   : 'text-black hover:text-green-600 hover:bg-green-50'
-=======
-                  : 'text-gray-600 hover:text-green-600 hover:bg-green-50'
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
               }`}
             >
               {tab.icon}
@@ -840,13 +811,8 @@ const ProducerDashboard = () => {
         {activeTab === 'dashboard' && (
           <>
             <div className="mb-8">
-<<<<<<< HEAD
               <h2 className="text-3xl font-bold text-black mb-2">¡Bienvenido, Juan!</h2>
               <p className="text-black">Gestiona tu producción y conecta directamente con tus consumidores</p>
-=======
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">¡Bienvenido, Juan!</h2>
-              <p className="text-gray-600">Gestiona tu producción y conecta directamente con tus consumidores</p>
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -855,15 +821,9 @@ const ProducerDashboard = () => {
                   <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                     <Package className="w-6 h-6 text-green-600" />
                   </div>
-<<<<<<< HEAD
                   <span className="text-2xl font-bold text-black">24</span>
                 </div>
                 <h3 className="text-black text-sm font-medium">Productos Activos</h3>
-=======
-                  <span className="text-2xl font-bold text-gray-900">24</span>
-                </div>
-                <h3 className="text-gray-600 text-sm font-medium">Productos Activos</h3>
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                 <p className="text-green-600 text-xs mt-1">+3 este mes</p>
               </div>
 
@@ -872,15 +832,9 @@ const ProducerDashboard = () => {
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                     <TrendingUp className="w-6 h-6 text-blue-600" />
                   </div>
-<<<<<<< HEAD
                   <span className="text-2xl font-bold text-black">Bs. 12,340</span>
                 </div>
                 <h3 className="text-black text-sm font-medium">Ventas del Mes</h3>
-=======
-                  <span className="text-2xl font-bold text-gray-900">Bs. 12,340</span>
-                </div>
-                <h3 className="text-gray-600 text-sm font-medium">Ventas del Mes</h3>
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                 <p className="text-blue-600 text-xs mt-1">+15% vs mes anterior</p>
               </div>
 
@@ -889,15 +843,9 @@ const ProducerDashboard = () => {
                   <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                     <Users className="w-6 h-6 text-amber-600" />
                   </div>
-<<<<<<< HEAD
                   <span className="text-2xl font-bold text-black">89</span>
                 </div>
                 <h3 className="text-black text-sm font-medium">Clientes</h3>
-=======
-                  <span className="text-2xl font-bold text-gray-900">89</span>
-                </div>
-                <h3 className="text-gray-600 text-sm font-medium">Clientes</h3>
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                 <p className="text-amber-600 text-xs mt-1">+12 nuevos</p>
               </div>
 
@@ -906,20 +854,13 @@ const ProducerDashboard = () => {
                   <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                     <Eye className="w-6 h-6 text-purple-600" />
                   </div>
-<<<<<<< HEAD
                   <span className="text-2xl font-bold text-black">156</span>
                 </div>
                 <h3 className="text-black text-sm font-medium">Visitas Perfil</h3>
-=======
-                  <span className="text-2xl font-bold text-gray-900">156</span>
-                </div>
-                <h3 className="text-gray-600 text-sm font-medium">Visitas Perfil</h3>
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                 <p className="text-purple-600 text-xs mt-1">Esta semana</p>
               </div>
             </div>
 
-<<<<<<< HEAD
             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-8">
               <h3 className="text-xl font-bold text-black mb-6">Acciones Rápidas</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -927,13 +868,6 @@ const ProducerDashboard = () => {
                   onClick={() => setShowAddProductModal(true)}
                   className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center space-x-3"
                 >
-=======
-            {/* Quick Actions Enhanced */}
-            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Acciones Rápidas</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center space-x-3">
->>>>>>> f1885de29dcf3580499ec9c79553b43b76ea3f2c
                   <Plus className="w-6 h-6" />
                   <span className="font-semibold">Agregar Producto</span>
                 </button>
