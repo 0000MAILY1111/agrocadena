@@ -1,11 +1,21 @@
-import React from 'react';
+"use client";
 
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Shield, Users, DollarSign, Award, Leaf, CheckCircle, ArrowRight, Globe, Eye, TrendingUp } from 'lucide-react';
 
-
 export default function Home() {
+  const router = useRouter();
+
+  const handleProducerClick = () => {
+    router.push('/productor');
+  };
+
+  const handleConsumerClick = () => {
+    router.push('/consumidor');
+  };
+
   return (
-     
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
       <header className="bg-white/80 backdrop-blur-md border-b border-green-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,7 +25,7 @@ export default function Home() {
                 <Leaf className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                AgroCadena 
+                AgroCadena
               </h1>
             </div>
             <nav className="hidden md:flex space-x-8">
@@ -27,7 +37,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-emerald-600/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -55,7 +64,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -68,7 +76,6 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Feature 1 */}
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-100 hover:shadow-lg transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl flex items-center justify-center mb-6">
                 <Shield className="w-6 h-6 text-white" />
@@ -95,7 +102,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Feature 2 */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100 hover:shadow-lg transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mb-6">
                 <Users className="w-6 h-6 text-white" />
@@ -122,7 +128,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Feature 3 */}
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-8 rounded-2xl border border-amber-100 hover:shadow-lg transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl flex items-center justify-center mb-6">
                 <DollarSign className="w-6 h-6 text-white" />
@@ -149,7 +154,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Feature 4 */}
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-8 rounded-2xl border border-purple-100 hover:shadow-lg transition-all duration-300">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center mb-6">
                 <Award className="w-6 h-6 text-white" />
@@ -179,7 +183,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Benefits Section */}
       <section id="benefits" className="py-20 bg-gradient-to-br from-green-50 to-emerald-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -235,17 +238,22 @@ export default function Home() {
             Únete a la plataforma que está transformando la forma en que compramos y vendemos productos agrícolas en Bolivia.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-green-600 px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+            <button 
+              onClick={handleProducerClick} 
+              className="bg-white text-green-600 px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
+            >
               Soy Productor
             </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300">
+            <button 
+              onClick={handleConsumerClick} 
+              className="border-2 border-white text-white px-8 py-3 rounded-xl font-semibold hover:bg-white/10 transition-all duration-300"
+            >
               Soy Consumidor
             </button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
