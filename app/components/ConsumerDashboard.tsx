@@ -409,7 +409,6 @@ const ConsumerDashboard = () => {
                 </label>
               </div>
 
-              {/* Wallet Connection */}
               {!account ? (
                 <button 
                   onClick={connectWallet}
@@ -430,7 +429,6 @@ const ConsumerDashboard = () => {
                 </div>
               )}
               
-              {/* Network Warning */}
               {networkError && (
                 <button 
                   onClick={() => switchNetwork(selectedNetwork)}
@@ -441,7 +439,6 @@ const ConsumerDashboard = () => {
                 </button>
               )}
 
-              {/* Shopping Cart */}
               <div className="relative">
                 <button className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
                   <ShoppingCart className="w-6 h-6" />
@@ -452,7 +449,6 @@ const ConsumerDashboard = () => {
                   )}
                 </button>
                 
-                {/* Cart Dropdown */}
                 {cart.length > 0 && (
                   <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
                     <h3 className="font-bold text-gray-900 mb-3">Carrito de Compras</h3>
