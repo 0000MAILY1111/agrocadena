@@ -1,9 +1,242 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { Leaf, Search, ShoppingCart, Heart, MapPin, Calendar, DollarSign, Star, Shield, Users, 
-  ArrowLeft, Filter, Eye, CheckCircle 
+  ArrowLeft, Filter, Eye, CheckCircle, Wallet, AlertCircle, Loader
 } from 'lucide-react';
 
 const ConsumerDashboard = () => {
+  const [account, setAccount] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
+  const [cart, setCart] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Sepolia network configuration
+  const SEPOLIA_CHAIN_ID = '0xaa36a7';
+  const SEPOLIA_NETWORK = {
+    chainId: SEPOLIA_CHAIN_ID,
+    chainName: 'Sepolia Test Network',
+    nativeCurrency: {
+      name: 'Sepolia ETH',
+      symbol: 'SEP',
+      decimals: 18
+    },
+    rpcUrls: ['https://sepolia.infura.io/v3/'],
+    blockExplorerUrls: ['https://sepolia.etherscan.io/']
+  };
+
+  useEffect(() => {
+    checkWalletConnection();
+  }, []);
+
+  const checkWalletConnection = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          setAccount(accounts[0]);
+          await checkNetwork();
+        }
+      } catch (error) {
+        console.error('Error checking wallet connection:', error);
+      }
+    }
+  };
+
+  const checkNetwork = async () => {
+    try {
+      const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+      if (chainId !== SEPOLIA_CHAIN_ID) {
+        setNetworkError(true);
+      } else {
+        setNetworkError(false);
+      }
+    } catch (error) {
+      console.error('Error checking network:', error);
+    }
+  };
+
+  const connectWallet = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      alert('Por favor instala MetaMask para continuar');
+      return;
+    }
+
+    setIsConnecting(true);
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      setAccount(accounts[0]);
+      await switchToSepolia();
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      alert('Error al conectar la billetera');
+    }
+    setIsConnecting(false);
+  };
+
+  const switchToSepolia = async () => {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: SEPOLIA_CHAIN_ID }],
+      });
+      setNetworkError(false);
+    } catch (switchError) {
+      if (switchError.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [SEPOLIA_NETWORK],
+          });
+          setNetworkError(false);
+        } catch (addError) {
+          console.error('Error adding Sepolia network:', addError);
+        }
+      }
+    }
+  };
+
+  const addToCart = (product) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.name === product.name);
+      if (existing) {
+        return prev.map(item => 
+          item.name === product.name 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (productName) => {
+    setCart(prev => prev.filter(item => item.name !== productName));
+  };
+
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => {
+      const price = parseFloat(item.price.replace('Bs. ', '').replace('/kg', ''));
+      return total + (price * item.quantity);
+    }, 0);
+  };
+
+  const processPayment = async () => {
+    if (!account) {
+      alert('Por favor conecta tu billetera primero');
+      return;
+    }
+
+    if (networkError) {
+      alert('Por favor cambia a la red Sepolia');
+      return;
+    }
+
+    if (cart.length === 0) {
+      alert('El carrito está vacío');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Convert total to ETH (simplified conversion for demo)
+      const totalInBolivianos = getCartTotal();
+      const ethAmount = (totalInBolivianos * 0.0001).toFixed(6); // Demo conversion rate
+      const weiAmount = (parseFloat(ethAmount) * Math.pow(10, 18)).toString(16);
+
+      // Marketplace contract address (demo address for Sepolia)
+      const marketplaceAddress = '0x742d35Cc7861C4532fF56c7b2b4e2A7267b2cf2B';
+
+      const transactionParameters = {
+        to: marketplaceAddress,
+        from: account,
+        value: '0x' + weiAmount,
+        data: '0x' // Simple payment, no contract interaction for this demo
+      };
+
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+
+      alert(`¡Compra exitosa! Hash de transacción: ${txHash}\nPuedes verificar tu transacción en: https://sepolia.etherscan.io/tx/${txHash}`);
+      setCart([]);
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      alert('Error al procesar el pago: ' + error.message);
+    }
+    setIsProcessing(false);
+  };
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const products = [
+    {
+      name: "Tomates Cherry Orgánicos",
+      producer: "Juan Pérez",
+      location: "Valle Alto, Cochabamba",
+      price: "Bs. 25/kg",
+      rating: 4.8,
+      image: "🍅",
+      certified: true,
+      inStock: true
+    },
+    {
+      name: "Lechuga Hidropónica",
+      producer: "María Quispe",
+      location: "El Alto, La Paz",
+      price: "Bs. 18/kg",
+      rating: 4.9,
+      image: "🥬",
+      certified: true,
+      inStock: true
+    },
+    {
+      name: "Papas Nativas Waycha",
+      producer: "Carlos Mamani",
+      location: "Potosí",
+      price: "Bs. 12/kg",
+      rating: 4.7,
+      image: "🥔",
+      certified: true,
+      inStock: false
+    },
+    {
+      name: "Quinoa Real",
+      producer: "Ana Condori",
+      location: "Oruro",
+      price: "Bs. 35/kg",
+      rating: 4.9,
+      image: "🌾",
+      certified: true,
+      inStock: true
+    },
+    {
+      name: "Zanahorias Baby",
+      producer: "José Vargas",
+      location: "Tarija",
+      price: "Bs. 22/kg",
+      rating: 4.6,
+      image: "🥕",
+      certified: true,
+      inStock: true
+    },
+    {
+      name: "Apio Fresco",
+      producer: "Rosa Flores",
+      location: "Santa Cruz",
+      price: "Bs. 15/kg",
+      rating: 4.5,
+      image: "🌿",
+      certified: true,
+      inStock: true
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <header className="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50">
@@ -19,15 +252,104 @@ const ConsumerDashboard = () => {
                   <Leaf className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Marketplace
+                  Marketplace Web3
                 </h1>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
-                <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
-              </button>
+              {/* Wallet Connection */}
+              {!account ? (
+                <button 
+                  onClick={connectWallet}
+                  disabled={isConnecting}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50"
+                >
+                  {isConnecting ? (
+                    <Loader className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Wallet className="w-4 h-4" />
+                  )}
+                  <span>{isConnecting ? 'Conectando...' : 'Conectar MetaMask'}</span>
+                </button>
+              ) : (
+                <div className="flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg">
+                  <Wallet className="w-4 h-4" />
+                  <span className="text-sm font-medium">{formatAddress(account)}</span>
+                </div>
+              )}
+              
+              {/* Network Warning */}
+              {networkError && (
+                <button 
+                  onClick={switchToSepolia}
+                  className="flex items-center space-x-2 px-3 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors"
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  <span className="text-sm">Cambiar a Sepolia</span>
+                </button>
+              )}
+
+              {/* Shopping Cart */}
+              <div className="relative">
+                <button className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                  <ShoppingCart className="w-6 h-6" />
+                  {cart.length > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {cart.length}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Cart Dropdown */}
+                {cart.length > 0 && (
+                  <div className="absolute right-0 top-12 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
+                    <h3 className="font-bold text-gray-900 mb-3">Carrito de Compras</h3>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {cart.map((item, index) => (
+                        <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100">
+                          <div>
+                            <p className="font-medium text-sm">{item.name}</p>
+                            <p className="text-xs text-gray-600">Cantidad: {item.quantity}</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm font-bold">{item.price}</span>
+                            <button 
+                              onClick={() => removeFromCart(item.name)}
+                              className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <div className="flex justify-between items-center mb-3">
+                        <span className="font-bold">Total: Bs. {getCartTotal().toFixed(2)}</span>
+                        <span className="text-sm text-gray-600">≈ {(getCartTotal() * 0.0001).toFixed(6)} ETH</span>
+                      </div>
+                      <button 
+                        onClick={processPayment}
+                        disabled={!account || networkError || isProcessing}
+                        className="w-full py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <Loader className="w-4 h-4 animate-spin" />
+                            <span>Procesando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Wallet className="w-4 h-4" />
+                            <span>Pagar con MetaMask</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">MC</span>
               </div>
@@ -40,6 +362,12 @@ const ConsumerDashboard = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">¡Hola, María!</h2>
           <p className="text-gray-600">Descubre productos frescos directamente de los productores bolivianos</p>
+          {account && (
+            <div className="mt-2 flex items-center space-x-2 text-sm text-green-600">
+              <CheckCircle className="w-4 h-4" />
+              <span>Billetera conectada - Listo para comprar con crypto</span>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-8">
@@ -91,20 +419,23 @@ const ConsumerDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-              <h3 className="text-lg font-bold mb-4">Tu Impacto</h3>
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 text-white">
+              <div className="flex items-center mb-4">
+                <Wallet className="w-6 h-6 mr-2" />
+                <h3 className="text-lg font-bold">Web3 Stats</h3>
+              </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span>Productores apoyados:</span>
-                  <span className="font-bold">12</span>
+                  <span>Transacciones:</span>
+                  <span className="font-bold">7</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Compras este mes:</span>
-                  <span className="font-bold">Bs. 850</span>
+                  <span>ETH gastado:</span>
+                  <span className="font-bold">0.045 ETH</span>
                 </div>
                 <div className="flex items-center">
-                  <Heart className="w-5 h-5 mr-2 text-red-300" />
-                  <span className="text-sm">Apoyando economía local</span>
+                  <Shield className="w-5 h-5 mr-2 text-green-300" />
+                  <span className="text-sm">Compras verificadas on-chain</span>
                 </div>
               </div>
             </div>
@@ -114,68 +445,7 @@ const ConsumerDashboard = () => {
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Productos Destacados</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    name: "Tomates Cherry Orgánicos",
-                    producer: "Juan Pérez",
-                    location: "Valle Alto, Cochabamba",
-                    price: "Bs. 25/kg",
-                    rating: 4.8,
-                    image: "🍅",
-                    certified: true,
-                    inStock: true
-                  },
-                  {
-                    name: "Lechuga Hidropónica",
-                    producer: "María Quispe",
-                    location: "El Alto, La Paz",
-                    price: "Bs. 18/kg",
-                    rating: 4.9,
-                    image: "🥬",
-                    certified: true,
-                    inStock: true
-                  },
-                  {
-                    name: "Papas Nativas Waycha",
-                    producer: "Carlos Mamani",
-                    location: "Potosí",
-                    price: "Bs. 12/kg",
-                    rating: 4.7,
-                    image: "🥔",
-                    certified: true,
-                    inStock: false
-                  },
-                  {
-                    name: "Quinoa Real",
-                    producer: "Ana Condori",
-                    location: "Oruro",
-                    price: "Bs. 35/kg",
-                    rating: 4.9,
-                    image: "🌾",
-                    certified: true,
-                    inStock: true
-                  },
-                  {
-                    name: "Zanahorias Baby",
-                    producer: "José Vargas",
-                    location: "Tarija",
-                    price: "Bs. 22/kg",
-                    rating: 4.6,
-                    image: "🥕",
-                    certified: true,
-                    inStock: true
-                  },
-                  {
-                    name: "Apio Fresco",
-                    producer: "Rosa Flores",
-                    location: "Santa Cruz",
-                    price: "Bs. 15/kg",
-                    rating: 4.5,
-                    image: "🌿",
-                    certified: true,
-                    inStock: true
-                  }
-                ].map((product, index) => (
+                {products.map((product, index) => (
                   <div key={index} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300">
                     <div className="relative">
                       <div className="h-48 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
@@ -202,7 +472,12 @@ const ConsumerDashboard = () => {
                       </div>
                       
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-lg font-bold text-gray-900">{product.price}</span>
+                        <div>
+                          <span className="text-lg font-bold text-gray-900">{product.price}</span>
+                          <div className="text-xs text-purple-600 font-medium">
+                            ≈ {(parseFloat(product.price.replace('Bs. ', '').replace('/kg', '')) * 0.0001).toFixed(6)} ETH
+                          </div>
+                        </div>
                         <div className="flex items-center">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
                           <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
@@ -210,11 +485,15 @@ const ConsumerDashboard = () => {
                       </div>
                       
                       <div className="flex gap-2">
-                        <button className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                          product.inStock 
-                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`} disabled={!product.inStock}>
+                        <button 
+                          onClick={() => addToCart(product)}
+                          className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                            product.inStock 
+                              ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700' 
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`} 
+                          disabled={!product.inStock}
+                        >
                           {product.inStock ? 'Agregar al carrito' : 'Agotado'}
                         </button>
                         <button className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
@@ -289,13 +568,13 @@ const ConsumerDashboard = () => {
                     </button>
                   </div>
                 ))}
-                </div>
-                </div>
+              </div>
             </div>
-            </div>
-            </div>
-            </div>
-    );
-
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
+
 export default ConsumerDashboard;
